@@ -2,6 +2,9 @@
 
 scripts sh to include in docker images
 
+**all scripts are POSIX compliants !**
+
 ## Scripts list
 
-... come soon ;)
+- php/update_phpini.sh
+
