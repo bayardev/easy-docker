@@ -41,8 +41,13 @@ Prefix=${Prefix:-"easy_"}
 for target in $Targets; do
     cmdname=$(basename -- "$target")
     cmdname="${cmdname%.*}"
-    curl -s --create-dirs -o "${BinDir}/${Prefix}${cmdname}" "${EasyDockerUrl}/${target}"
-    chmod +x "${BinDir}/${Prefix}${cmdname}"
+    if result=$(curl -sSfLk -o "${BinDir}/${Prefix}${cmdname}" "${EasyDockerUrl}/${target}" 2>&1); then
+        eprint "\e[0;32m [SUCCESS] ${target} imported in ${BinDir}/${Prefix}${cmdname} \e[0m"
+        chmod +x "${BinDir}/${Prefix}${cmdname}"
+    else
+        eprint "\e[41;1;37m Failed to get ${EasyDockerUrl}/${target} \e[0m";
+        eprint "\e[41;1;37m [ERROR] ${result} \e[0m";
+    fi
 done
 
 exit 0;
