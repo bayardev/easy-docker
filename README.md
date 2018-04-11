@@ -1,6 +1,8 @@
-# Docker scripts
+# EASY-DOCKER
 
-scripts sh to include in docker images
+Collection of shell scripts that make esaier dockers life.
+
+Include them in your images ...
 
 **all scripts are POSIX compliants !**
 
