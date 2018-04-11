@@ -1,0 +1,48 @@
+#!/bin/sh
+
+eprint()
+{
+    msg="${*}"
+    printf "%b\n" "$msg"
+}
+
+## OPTIONS
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+while getopts ":b:p:" opt; do
+    case "$opt" in
+        b) # Set BinDir
+            BinDir="$OPTARG"
+            ;;
+        p) # Set Prefix
+            Prefix="$OPTARG"
+            ;;
+        :) # If Option require an argument and none given, Exit with Error
+            eprint "\e[41;1;37m [ERROR] Option '-$OPTARG' require a value \e[0m"; exit 40;
+            ;;
+        ? | *) # If not valid Option : print Warning
+            eprint "\e[43;1;90m [WARNING] Option '-$OPTARG' not Valid ! \e[0m"; exit 40;
+            ;;
+    esac
+done
+shift "$((OPTIND-1))"
+
+Targets=${1?"Nothing to Add ??? (missing argument)"}
+Targets="$*"
+EasyDockerUrl='https://raw.githubusercontent.com/bayardev/easy-docker/master'
+
+## Default Value for "$BinDir"
+BinDir=${BinDir:-"/usr/bin"}
+
+## Default Value for "$Prefix"
+Prefix=${Prefix:-"easy_"}
+## if got 'false' set to empty string
+[ "$Prefix" = "false" ] && Prefix=""
+
+for target in $Targets; do
+    cmdname=$(basename -- "$target")
+    cmdname="${cmdname%.*}"
+    curl -s --create-dirs -o "${BinDir}/${Prefix}${cmdname}" "${EasyDockerUrl}/${target}"
+    chmod +x "${BinDir}/${Prefix}${cmdname}"
+done
+
+exit 0;
