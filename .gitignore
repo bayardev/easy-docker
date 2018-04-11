@@ -1,0 +1,5 @@
+*.nogit*
+*.idea
+*~
+*.lnk
+.env
