@@ -3,6 +3,14 @@
 ## BAse URL for getting repo:easy-docker files
 EasyDockerUrl='https://raw.githubusercontent.com/bayardev/easy-docker/master'
 
+## Try to guess os_release ID
+GUESS_OS_ID=$(printf '%b' "$(grep '^ID=' /etc/os-release)" | sed -e 's/ID=//g')
+## Set Deafult BinDir
+DeafultBinDir="/usr/bin"
+if [ "$GUESS_OS_ID" = "debian" ] || [ "$GUESS_OS_ID" = "alpine" ]; then
+    DeafultBinDir="/usr/local/bin"
+fi
+
 eprint()
 {
     msg="${*}"
@@ -19,7 +27,7 @@ usage()
     eprint "\e[1;32m[Options]\e[0m"
     eprint "    -h  print this help and exit"
     eprint "    -x  force 'chmod +x' on imported files"
-    eprint "    -d </path/to/destination>  set Destination Folder \e[0;33m(default: '/usr/bin')\e[0m"
+    eprint "    -d </path/to/destination>  set Destination Folder \e[0;33m(default: '${DeafultBinDir}')\e[0m"
     eprint "    -p  <prefix_> set Prefix for imported filenames \e[0;33m(default: 'easy_')\e[0m"
     eprint "        To remove prefix use '-p false'"
     eprint "\e[1;32m[Examples]\e[0m"
@@ -60,7 +68,7 @@ Targets=${1?"Nothing to Add ??? (missing argument)"}
 Targets="$*"
 
 ## Default Value for "$DestDir"
-DestDir=${DestDir:-"/usr/bin"}
+DestDir=${DestDir:-"$DeafultBinDir"}
 
 ## Default Value for "$Prefix"
 Prefix=${Prefix:-"easy_"}
