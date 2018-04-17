@@ -8,8 +8,10 @@ is_in_cmd()
 }
 
 if [ -n "$CI_TEST_CMD" ]; then
+    printf "\e[47;1;35m [RUN TEST_CMD]: %s \e[0m\n" "$CI_TEST_SCRIPT"
+
     if result=$(eval "$CI_TEST_CMD" 2>&1); then
-        printf '\e[42;1;97m [SUCCESS] %b \e[0m\n' "$result"
+        printf '\e[42;1;97m [SUCCESS] Message:\e[0m\n \e[0;32m %b \n\e[42;1;97m[END]\e[0m\n' "$result"
         # If 'exit' in cmd do exit;
         is_in_cmd "exit" && exit 0;
     else
