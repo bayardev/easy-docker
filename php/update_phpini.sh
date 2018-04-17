@@ -60,6 +60,34 @@ list_keys()
     done
 }
 
+the_end()
+{
+    msg="$1"
+    exit_status=${2:-"0"}
+
+    eprint "$msg"
+    [ -z "$3" ] && eprint "$0 -h for help";
+    exit $((exit_status))
+}
+
+update_line_if()
+{
+    if [ ! -z "$1" ]; then
+        value=$(printf '%s' "$1" | sed 's/[#\]/\\\0/g')
+        name="$2"
+        success_msg="\e[0;32m Set PHP ${name} = ${value} \e[0m"
+
+        if grep "${name} = " "${PhpIniPath}" > /dev/null; then
+            sed -i "s#\;\?\\s\?${name} = .*#${name} = ${value}#" "${PhpIniPath}" \
+                && eprint "$success_msg";
+        else
+            echo "${name} = ${value}" >> "${PhpIniPath}" \
+                && eprint "$success_msg";
+        fi
+
+    fi
+}
+
 usage()
 {
     eprint "\e[1;32m[Synopsis]\e[0m"
@@ -77,16 +105,6 @@ usage()
     eprint "       $0 -c -p '/usr/local/etc/php/php.ini'"
 
     exit_status=${1:-"0"}
-    exit $((exit_status))
-}
-
-the_end()
-{
-    msg="$1"
-    exit_status=${2:-"0"}
-
-    eprint "$msg"
-    [ -z "$3" ] && eprint "$0 -h for help";
     exit $((exit_status))
 }
 
@@ -133,24 +151,6 @@ if [ ! -f "$PhpIniPath" ]; then
     fi
     eprint "\e[0;32m Succesfully created new file: ${PhpIniPath} \e[0m"
 fi
-
-update_line_if()
-{
-    if [ ! -z "$1" ]; then
-        value=$(printf '%s' "$1" | sed 's/[#\]/\\\0/g')
-        name="$2"
-        success_msg="\e[0;32m Set PHP ${name} = ${value} \e[0m"
-
-        if grep "${name} = " "${PhpIniPath}" > /dev/null; then
-            sed -i "s#\;\?\\s\?${name} = .*#${name} = ${value}#" "${PhpIniPath}" \
-                && eprint "$success_msg";
-        else
-            echo "${name} = ${value}" >> "${PhpIniPath}" \
-                && eprint "$success_msg";
-        fi
-
-    fi
-}
 
 for phpini_key in $phpini_list; do
     varname="PHP_"$(echo "$phpini_key" |tr "[:lower:]" "[:upper:]" |tr "." "_")

@@ -1,5 +1,5 @@
 #!/bin/sh
-set -em
+set -e
 
 is_in_cmd()
 {
