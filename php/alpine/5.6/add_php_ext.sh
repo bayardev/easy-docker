@@ -49,6 +49,9 @@ is_installed()
     fi
 }
 
+# Print START script execution
+eprint "\e[32;1m [START]: $0 \e[0m\n"
+
 # Write installed module in a temp file for easier search
 create_tmp_php_mods_list
 
@@ -157,3 +160,6 @@ done
 
 # Delete php_mods_list temp file
 remove_tmp_php_mods_list
+
+# Exit Success
+eprint "\e[32;1m [END] Executed: $0 :) \e[0m" && exit 0;
