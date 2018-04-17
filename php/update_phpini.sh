@@ -2,7 +2,7 @@
 set -e
 
 # PHP.INI LIST
-phpini_list="short_open_tag
+readonly phpini_list="short_open_tag
 output_buffering
 open_basedir
 max_execution_time
@@ -90,6 +90,9 @@ the_end()
     exit $((exit_status))
 }
 
+# Print START script execution
+eprint "\e[32;1m [START]: $0 \e[0m\n"
+
 Create="false";
 ## OPTIONS
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
@@ -157,4 +160,4 @@ for phpini_key in $phpini_list; do
 done
 
 # Exit Success
-eprint "\e[42;1;37m [END] Executed: $0 :) \e[0m" && exit 0;
+eprint "\e[32;1m [END] Executed: $0 :) \e[0m" && exit 0;
