@@ -8,18 +8,19 @@ readonly DEFAULT_TEMPLATE_NAME="pool.conf.tpl"
 readonly GET_TEMPLATE_FROM="https://raw.githubusercontent.com/bayardev/easy-docker/master/php/templates"
 
 ## COLORS
-CLR0="\e[0m"
-CLRh1="\e[1;32m"
-CLRh2="\e[32m"
-CLRspan="\e[33m"
-CLRwarn="\e[1;33m"
-CLRerr="\e[41;1;37m"
-CLRinfo="${CLRh2}"
+CLR0='\e[0m'
+CLRh1='\e[1;32m'
+CLRh2='\e[32m'
+CLRspan='\e[33m'
+CLRwarn='\e[1;33m'
+CLRerr='\e[41;1;37m'
+CLRinfo='\e[32m'
+CLRnotice='\e[1;36m'
 
 eprint()
 {
     msg="${*}"
-    printf "%b${CLR0}\n" "$msg"
+    printf '%b%b\n' "$msg" "$CLR0"
 }
 
 the_end()
@@ -28,19 +29,23 @@ the_end()
     exit_status=${2:-"0"}
 
     eprint "$msg"
-    [ -z "$3" ] && eprint "${CLRspan}$0 -h for help";
+    [ -z "$3" ] && eprint "> ${CLRinfo}Use: $0 -h for help";
     exit $((exit_status))
 }
 
 get_template()
 {
     status=0
-    if result=$(curl -sSfLk -o "${TemplatePath}" "${GET_TEMPLATE_FROM}/${TemplateName}" 2>&1); then
-        eprint "${CLRinfo}[INFO] ${TemplateName} imported in ${TemplatePath}"
+    if [ ! -f "$TemplatePath" ]; then
+        if result=$(curl -sSfLk -o "${TemplatePath}" "${GET_TEMPLATE_FROM}/${TemplateName}" 2>&1); then
+            eprint "${CLRinfo}[INFO] ${TemplateName} imported in ${TemplatePath}"
+        else
+            status=$?
+            eprint "${CLRerr}Failed to get ${GET_TEMPLATE_FROM}/${TemplateName}";
+            eprint "${CLRerr}[ERROR] ${result}";
+        fi
     else
-        status=$?
-        eprint "${CLRerr}Failed to get ${GET_TEMPLATE_FROM}/${TemplateName}";
-        eprint "${CLRerr}[ERROR] ${result}";
+        eprint "${CLRnotice}[NOTICE] ${TemplatePath} Already exists. Will not be imported again..."
     fi
 
     return $((status))
@@ -49,7 +54,8 @@ get_template()
 copy_template()
 {
     status=0
-    if result=$(cp "$TemplatePath" "$DestPath" 2>&1); then
+    cp_options=${Force:-"-n"}
+    if result=$(cp "$cp_options" "$TemplatePath" "$DestPath" 2>&1); then
         eprint "${CLRinfo}[INFO] ${DestPath} copied from ${TemplatePath}"
     else
         status=$?
@@ -65,16 +71,18 @@ usage()
     eprint "${CLRh2}[Synopsis]"
     eprint "    Create new php-fpm pool for <app-name> based on template"
     eprint "${CLRh2}[Usage]"
-    eprint "   $0 [-u 'user'] [-g 'group'] <app-name>"
+    eprint "   $0 [-options] <app-name> [user] [group]"
     eprint "${CLRh2}[Options]"
     eprint "    -h  print this help and exit"
-    eprint "    -u <user>  set Unix user of processes ${CLRspan}(default: '${DEFAULT_FPM_USER}')"
-    eprint "    -g <group>  set Unix group of processes ${CLRspan}(If the group is not set, the default user's group will be used)"
-    eprint "    -d <fpm-conf-dir>  php-fpm conf dir for pools ${CLRspan}(default: '${DEFAULT_FPM_CONF_DIR}')"
+    eprint "    -d <fpm-conf-dir>  php-fpm conf dir ${CLRspan}(default: '${DEFAULT_FPM_CONF_DIR}')"
     eprint "    -t <template-name>  pool template-name ${CLRspan}(default: '${DEFAULT_TEMPLATE_NAME}')"
     eprint "${CLRh2}[Examples]"
-    eprint "       $0 -u toto myapp"
-    eprint "       $0 -u php-fpm -d /etc/php-fpm.d myapp"
+    eprint "       $0 myapp myuser"
+    eprint "       $0 -d /etc/php-fpm.d myapp php-fpm"
+    eprint "${CLRh2}[Defaults]"
+    eprint "    user  : ${DEFAULT_FPM_USER}"
+    eprint "    group : If the group is not set, the default user's group will be used"
+
 
     exit_status=${1:-"0"}
     exit $((exit_status))
@@ -85,16 +93,13 @@ eprint "${CLRh1}[START]: $0"
 
 ## OPTIONS
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
-while getopts ":hu:g:d:t:" opt; do
+while getopts ":hfd:t:" opt; do
     case "$opt" in
         h) # Print usage() & exit
             usage 0;
             ;;
-        u) # Set FpmUser
-            FpmUser="$OPTARG"
-            ;;
-        g) # Set FpmGroup
-            FpmGroup="$OPTARG"
+        f) # Set Force
+            Force="-f";
             ;;
         d) # Set FpmConfDir
             FpmConfDir="$OPTARG"
@@ -112,15 +117,15 @@ while getopts ":hu:g:d:t:" opt; do
 done
 shift "$((OPTIND-1))"
 
-## If called without argument ${app-name} Exit 0
-set -x
+## If called without argument <app-name> Exit 0
 AppName="$1"
-[ -z "$AppName" ] && the_end "${CLRwarn}[WARNING] Missing argument APP-NAME . Nothing to do ..." 0
+[ -z "$AppName" ] && the_end "${CLRwarn}[WARNING] Missing argument APP-NAME. Nothing to do ..." 0
 
 ## Default Value for "$FpmUser"
-FpmUser=${FpmUser:-"$DEFAULT_FPM_USER"}
+FpmUser=${2:-"$DEFAULT_FPM_USER"}
 ## Default Value for "$FpmGroup"
-FpmGroup=${FpmGroup:-"$FpmUser"}
+FpmGroup=${3:-"$FpmUser"}
+
 ## Default Value for "$FpmConfDir"
 FpmConfDir=${FpmConfDir:-"$DEFAULT_FPM_CONF_DIR"}
 ## Default Value for "$TemplateName"
@@ -129,7 +134,11 @@ TemplateName=${TemplateName:-"$DEFAULT_TEMPLATE_NAME"}
 TemplatePath="${FpmConfDir}/${TemplateName}"
 ## Set "$DestPath"
 DestPath="${FpmConfDir}/${AppName}.conf"
-set +x
+
+if [ -f "$DestPath" ]; then
+    [ -z "$Force" ] && the_end "${CLRwarn}[WARNING] ${DestPath} already exists. Use -f (force) to overwrite. Nothing to do ..." 0
+    eprint "${CLRinfo}[INFO] Option -f (force) given : ${DestPath} will be overwritten"
+fi
 
 ## Get template
 get_template || exit $?
