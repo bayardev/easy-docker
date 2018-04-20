@@ -5,7 +5,7 @@ set -ea
 readonly DEFAULT_FPM_USER="www-data"
 readonly DEFAULT_FPM_CONF_DIR="/usr/local/etc/php-fpm.d"
 readonly DEFAULT_TEMPLATE_NAME="pool.conf.tpl"
-readonly GET_TEMPLATE_FROM="https://raw.githubusercontent.com/bayardev/easy-docker/master/php/templates"
+readonly GET_TEMPLATE_FROM="https://raw.githubusercontent.com/bayardev/easy-docker/master/php/etc"
 
 ## COLORS
 CLR0='\e[0m'

@@ -15,6 +15,5 @@ Include them in your images ...
 
 ## Conf files templates
 
-- php/etc/ : php{?version}.ini
-- php/etc/fpm/ : pool{?version}.conf, php-fpm{?version}.conf
+- php/etc/ : php{?version}.ini, php-fpm{?version}.conf, pool{?version}.conf
 
