@@ -9,4 +9,12 @@ Include them in your images ...
 ## Scripts list
 
 - php/update_phpini.sh
+- php/add_fpm_pool.sh
+- php/alpine/5.6/add_php_ext.sh
+- test/ci_test_container.sh
+
+## Conf files templates
+
+- etc/php/ : php{?version}.ini
+- etc/php/fpm/ : pool{?version}.conf, php-fpm{?version}.conf
 
