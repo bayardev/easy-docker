@@ -45,7 +45,7 @@ get_template()
             eprint "${CLRerr}[ERROR] ${result}";
         fi
     else
-        eprint "${CLRnotice}[NOTICE] ${TemplatePath} Already exists. Will not be imported again..."
+        eprint "${CLRnotice}[NOTICE] Template ${TemplatePath} Already exists. Will not be imported again..."
     fi
 
     return $((status))
@@ -54,8 +54,10 @@ get_template()
 copy_template()
 {
     status=0
-    cp_options=${Force:-"-n"}
-    if result=$(cp "$cp_options" "$TemplatePath" "$DestPath" 2>&1); then
+    cp_cmd='cp'
+    [ -n "$Force" ] && cp_cmd='cp -f'
+
+    if result=$(${cp_cmd} "$TemplatePath" "$DestPath" 2>&1); then
         eprint "${CLRinfo}[INFO] ${DestPath} copied from ${TemplatePath}"
     else
         status=$?
@@ -137,7 +139,7 @@ DestPath="${FpmConfDir}/${AppName}.conf"
 
 if [ -f "$DestPath" ]; then
     [ -z "$Force" ] && the_end "${CLRwarn}[WARNING] ${DestPath} already exists. Use -f (force) to overwrite. Nothing to do ..." 0
-    eprint "${CLRinfo}[INFO] Option -f (force) given : ${DestPath} will be overwritten"
+    eprint "${CLRnotice}[NOTICE] Pool ${DestPath} already exists. Got option -f (force): ${DestPath} will be overwritten"
 fi
 
 ## Get template
