@@ -1,24 +1,61 @@
 #!/bin/sh
-set -e
+# shellcheck disable=SC2034
 
+set -a
 # CONSTANTS
 readonly TMP_PHP_MODS_LIST_FILE="/tmp/php_mods.list"
+## COLORS
+CLR0='\e[0m'
+CLRh1='\e[1;32m'
+CLRh2='\e[32m'
+CLRspan='\e[33m'
+CLRwarning='\e[1;33m'
+CLRerror='\e[41;1;37m'
+CLRinfo='\e[32m'
+CLRnotice='\e[1;36m'
+CLRstart=${CLRh1}
+CLRend=${CLRstart}
+CLRstop='\e[1;31m'
+CLRDebug='\e[36m'
+set +a
 
 # FUNCTIONS
 eprint()
 {
     msg="${*}"
-    printf "%b\n" "$msg"
+
+    FirstWord=$(printf '%b' "$msg" | grep -oE '^\[?(ERROR|WARNING|INFO|NOTICE|START|END|STOP)\]?');
+    if [ -n "$FirstWord" ]; then
+        nameCLR="CLR"$(printf '%s' "$FirstWord" | tr '[:upper:]' '[:lower:]' | tr -d '[]')
+        eval nameCLR="\${$nameCLR}"
+        printf "%b" "$nameCLR"
+    fi
+
+    printf '%b%b\n' "$msg" "$CLR0"
+}
+
+# shellcheck disable=SC2086
+the_end()
+{
+    ExitStatus=${1:-"0"}
+
+    if [ $ExitStatus -eq 0 ]; then
+        eprint "[END] Executed: $0 :)"
+    else
+        eprint "[STOP] execution of $0 , because error $ExitStatus"
+    fi
+
+    exit $((ExitStatus))
 }
 
 create_tmp_php_mods_list()
 {
     if result=$(php -m 2>&1 > "$TMP_PHP_MODS_LIST_FILE"); then
-        eprint "\e[0;36m [DEBUG] Created: $TMP_PHP_MODS_LIST_FILE \e[0m"
+        eprint "[DEBUG] Created: $TMP_PHP_MODS_LIST_FILE"
     else
         status=$?
-        eprint "\e[41;1;37m [ERROR] CODE: $status\n MESSAGE: $result \e[0m"
-        exit $((status));
+        eprint "[ERROR] CODE: $status\\n MESSAGE: $result"
+        the_end $((status));
     fi
 
     return 0
@@ -27,30 +64,30 @@ create_tmp_php_mods_list()
 remove_tmp_php_mods_list()
 {
     if [ -f "$TMP_PHP_MODS_LIST_FILE" ]; then
-        printf "\e[0;36m [DEBUG] "
+        printf '%b[DEBUG] ' "$CLRDebug"
         rm -v "$TMP_PHP_MODS_LIST_FILE"
-        printf "\e[0m"
+        printf "%b" "$CLR0"
     fi
 }
 
 is_installed()
 {
     if result=$(grep "$1" /tmp/php_mods.list 2>&1); then
-        eprint "\e[0;33m [WARNING] $result is already installed. It won't be installed again :)\e[0m"
+        eprint "[WARNING] $result is already installed. It won't be installed again :)"
         return 0
     else
         status=$?
         if [ $status -eq 1 ]; then
             return $((status))
         else
-            eprint "\e[41;1;37m [ERROR] CODE: $status\n MESSAGE: $result \e[0m"
-            exit $((status));
+            eprint "[ERROR] CODE: $status\\n MESSAGE: $result"
+            the_end $((status));
         fi
     fi
 }
 
 # Print START script execution
-eprint "\e[32;1m [START]: $0 \e[0m\n"
+eprint "[START]: $0"
 
 # Write installed module in a temp file for easier search
 create_tmp_php_mods_list
@@ -59,10 +96,10 @@ create_tmp_php_mods_list
 AddPhpExt="$*"
 
 # Do the job :)
+# shellcheck disable=SC2086
 for ext in $AddPhpExt; do
     if ! is_installed "$ext"; then
-        eprint "\e[0;32m [INFO] Gonna try to install $ext. \e[0m"
-
+        eprint "[INFO] Gonna try to install ${ext}."
         case "$ext" in
             pdo_mysql )
                 # echo "pdo_mysql"
@@ -116,6 +153,16 @@ for ext in $AddPhpExt; do
                 && docker-php-ext-install memcached \
                 && docker-php-source delete
                 ;;
+            memcache )
+                # echo "apcu"
+                docker-php-source extract \
+                && apk add --no-cache --virtual .phpize-deps-configure $PHPIZE_DEPS \
+                && apk add --update --no-cache openssh-client make grep autoconf gcc libc-dev zlib-dev \
+                && yes | pecl install -fo memcache \
+                && docker-php-ext-enable memcache \
+                && apk del .phpize-deps-configure \
+                && docker-php-source delete
+                ;;
             apcu )
                 # echo "apcu"
                 docker-php-source extract \
@@ -151,8 +198,8 @@ for ext in $AddPhpExt; do
                 && apk del autoconf g++ libtool make pcre-dev
                 ;;
             ? | *) # If extension not in cases
-                eprint "\e[0;33m [WARNING] extension $ext is not present in case list \e[0m";
-                eprint "\e[41;1;37m\e[7m [IMPORTANT] Please check extension name for: $ext \e[0m"
+                eprint "[WARNING] extension $ext is not present in case list";
+                eprint "[IMPORTANT] Please check extension name for: $ext"
                 ;;
         esac
     fi
@@ -162,4 +209,4 @@ done
 remove_tmp_php_mods_list
 
 # Exit Success
-eprint "\e[32;1m [END] Executed: $0 :) \e[0m" && exit 0;
+the_end;
