@@ -17,6 +17,7 @@ CLRnotice='\e[1;36m'
 CLRstart=${CLRh1}
 CLRend=${CLRstart}
 CLRstop='\e[1;31m'
+CLRDebug='\e[36m'
 set +a
 
 eprint()
