@@ -49,12 +49,14 @@ the_end()
 
 update_line_if()
 {
-    if grep "^\\;\\?\\s*\\?${1} =.*" "${PoolConfPath}" > /dev/null; then
-        SuccessMsg="[INFO] Applied: '$1 = $2' in ${PoolConfPath}";
-        sed -i "s#^\\;\\?\\s*\\?${1} =.*\\?#${1} = ${2}#" "${PoolConfPath}" \
-            && eprint "$SuccessMsg";
-    else
-        eprint "[WARNING] Conf Key $1 NOT FOUND in ${PoolConfPath}";
+    if [ -n "$1" ] && [ -n "$2" ]; then
+        if grep "^\\;\\?\\s*\\?${1} =.*" "${PoolConfPath}" > /dev/null; then
+            SuccessMsg="[INFO] Applied: '$1 = $2' in ${PoolConfPath}";
+            sed -i "s#^\\;\\?\\s*\\?${1} =.*\\?#${1} = ${2}#" "${PoolConfPath}" \
+                && eprint "$SuccessMsg";
+        else
+            eprint "[WARNING] Conf Key $1 NOT FOUND in ${PoolConfPath}";
+        fi
     fi
 }
 
