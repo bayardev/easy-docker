@@ -84,7 +84,6 @@ update_line_if()
             echo "${name} = ${value}" >> "${PhpIniPath}" \
                 && eprint "$success_msg";
         fi
-
     fi
 }
 
