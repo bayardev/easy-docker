@@ -101,6 +101,10 @@ for ext in $AddPhpExt; do
     if ! is_installed "$ext"; then
         eprint "[INFO] Gonna try to install ${ext}."
         case "$ext" in
+            sockets )
+                # echo "sockets"
+                docker-php-ext-install sockets
+                ;;
             pdo_mysql )
                 # echo "pdo_mysql"
                 docker-php-ext-install pdo_mysql
