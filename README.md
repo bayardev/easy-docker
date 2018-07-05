@@ -8,9 +8,13 @@ Include them in your images ...
 
 ## Scripts list
 
-- php/update_phpini.sh
+- easy-add
 - php/add_fpm_pool.sh
-- php/alpine/5.6/add_php_ext.sh
+- php/update_fpm_pool.sh
+- php/update_phpini.sh
+- php/alpine/5.6/add_php_ext.sh **(_DEPRECATED_)**
+- php/alpine/7.0/add_php_ext.sh **(_DEPRECATED_)**
+- php/alpine/add_php_ext.sh
 - test/ci_test_container.sh
 
 ## Conf files templates
