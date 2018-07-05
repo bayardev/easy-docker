@@ -1,5 +1,6 @@
 *.nogit*
 *.idea
+*.sublime-workspace
 *~
 *.lnk
 .env
