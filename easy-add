@@ -23,7 +23,7 @@ usage()
     eprint "    Import file(s) from ${EasyDockerUrl} giving only repo relative path"
     eprint "    After import 'chmod +x' is executed on files with .sh extension or if -x option is set"
     eprint "\\e[1;32m[Usage]\\e[0m"
-    eprint "   $0 [-x] [-b 'bin-dir'] [-p 'prefix'] <File_RelativePath>"
+    eprint "   $0 [-x] [-d 'dest-dir'] [-p 'prefix'] <File_RelativePath> [Another_File] [...]"
     eprint "\\e[1;32m[Options]\\e[0m"
     eprint "    -h  print this help and exit"
     eprint "    -x  force 'chmod +x' on imported files"
@@ -31,6 +31,7 @@ usage()
     eprint "    -p  <prefix_> set Prefix for imported filenames \\e[0;33m(default: 'easy_')\\e[0m"
     eprint "        To remove prefix use '-p false'"
     eprint "\\e[1;32m[Examples]\\e[0m"
+    eprint "       $0  php/update_phpini.sh php/alpine/add_php_ext.sh test/ci_test_container.sh"
     eprint "       $0 -b /usr/local/bin php/update_phpini.sh"
     eprint "       $0 -p false php/update_phpini.sh"
 
