@@ -108,6 +108,39 @@ php_version()
     echo "$Result"
 }
 
+usage()
+{
+    eprint "\\e[1;32m[Synopsis]\\e[0m"
+    eprint "    Install php extensions"
+    eprint "\\e[1;32m[Usage]\\e[0m"
+    eprint "    $0 <ext_name> [more_ext] [...]"
+    eprint "\\e[1;32m[Options]\\e[0m"
+    eprint "    -h  print this help and exit"
+    eprint "\\e[1;32m[Examples]\\e[0m"
+    eprint "       $0 sockets pdo_mysql zip"
+
+    exit_status=${1:-"0"}
+    exit $((exit_status))
+}
+
+Create="false";
+## OPTIONS
+OPTIND=1         # Reset in case getopts has been used previously in the shell.
+while getopts ":h" opt; do
+    case "$opt" in
+        h) # Print usage() & exit
+            usage 0;
+            ;;
+        :) # If Option require an argument and none given, Exit with Error
+            eprint "\\e[41;1;37m [ERROR] Option '-$OPTARG' require a value \\e[0m"; usage 40;
+            ;;
+        ? | *) # If not valid Option : print Warning
+            eprint "\\e[43;1;90m [WARNING] Option '-$OPTARG' not Valid ! \\e[0m"; usage 40;
+            ;;
+    esac
+done
+shift "$((OPTIND-1))"
+
 # Print START script execution
 eprint "[START]: $0"
 

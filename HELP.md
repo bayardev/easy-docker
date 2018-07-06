@@ -61,3 +61,19 @@ easy_update_phpini -h
        easy_update_phpini -c -p '/usr/local/etc/php/php.ini'
 
 ```
+
+## php/alpine/add_php_ext
+
+```sh
+easy_add_php_ext -h
+
+[Synopsis]
+    Install php extensions
+[Usage]
+    easy_add_php_ext <ext_name> [more_ext] [...]
+[Options]
+    -h  print this help and exit
+[Examples]
+       easy_add_php_ext sockets pdo_mysql zip
+
+```
