@@ -83,10 +83,6 @@ usage()
     exit $((ExitStatus))
 }
 
-
-# Print START script execution
-eprint "[START]: $0"
-
 ## OPTIONS
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 while getopts ":hd:" opt; do
@@ -106,6 +102,9 @@ while getopts ":hd:" opt; do
     esac
 done
 shift "$((OPTIND-1))"
+
+# Print START script execution
+eprint "[START]: $0"
 
 FoundEnvVars=$(env | grep -E '^FPM_\w*=')
 eprint "[INFO] Found EnvVars: \\n${FoundEnvVars}"

@@ -90,9 +90,6 @@ usage()
     exit $((exit_status))
 }
 
-# Print START script execution
-eprint "${CLRh1}[START]: $0"
-
 ## OPTIONS
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
 while getopts ":hfd:t:" opt; do
@@ -118,6 +115,9 @@ while getopts ":hfd:t:" opt; do
     esac
 done
 shift "$((OPTIND-1))"
+
+# Print START script execution
+eprint "${CLRh1}[START]: $0"
 
 ## If called without argument <app-name> Exit 0
 AppName="$1"

@@ -1,6 +1,6 @@
 # EASY-DOCKER
 
-Collection of shell scripts that make esaier dockers life.
+Collection of shell scripts that make easier dockers life.
 
 Include them in your images ...
 
@@ -8,7 +8,7 @@ Include them in your images ...
 
 ## Scripts list
 
-- easy-add
+- easy-add **(_MAIN_)**
 - php/add_fpm_pool.sh
 - php/update_fpm_pool.sh
 - php/update_phpini.sh
