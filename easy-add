@@ -14,23 +14,23 @@ fi
 eprint()
 {
     msg="${*}"
-    printf "%b\n" "$msg"
+    printf "%b\\n" "$msg"
 }
 
 usage()
 {
-    eprint "\e[1;32m[Synopsis]\e[0m"
+    eprint "\\e[1;32m[Synopsis]\\e[0m"
     eprint "    Import file(s) from ${EasyDockerUrl} giving only repo relative path"
     eprint "    After import 'chmod +x' is executed on files with .sh extension or if -x option is set"
-    eprint "\e[1;32m[Usage]\e[0m"
+    eprint "\\e[1;32m[Usage]\\e[0m"
     eprint "   $0 [-x] [-b 'bin-dir'] [-p 'prefix'] <File_RelativePath>"
-    eprint "\e[1;32m[Options]\e[0m"
+    eprint "\\e[1;32m[Options]\\e[0m"
     eprint "    -h  print this help and exit"
     eprint "    -x  force 'chmod +x' on imported files"
-    eprint "    -d </path/to/destination>  set Destination Folder \e[0;33m(default: '${DeafultBinDir}')\e[0m"
-    eprint "    -p  <prefix_> set Prefix for imported filenames \e[0;33m(default: 'easy_')\e[0m"
+    eprint "    -d </path/to/destination>  set Destination Folder \\e[0;33m(default: '${DeafultBinDir}')\\e[0m"
+    eprint "    -p  <prefix_> set Prefix for imported filenames \\e[0;33m(default: 'easy_')\\e[0m"
     eprint "        To remove prefix use '-p false'"
-    eprint "\e[1;32m[Examples]\e[0m"
+    eprint "\\e[1;32m[Examples]\\e[0m"
     eprint "       $0 -b /usr/local/bin php/update_phpini.sh"
     eprint "       $0 -p false php/update_phpini.sh"
 
@@ -40,7 +40,7 @@ usage()
 
 ## OPTIONS
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
-while getopts ":hb:p:x" opt; do
+while getopts ":hd:p:x" opt; do
     case "$opt" in
         h) # Print usage() & exit
             usage 0;
@@ -55,10 +55,10 @@ while getopts ":hb:p:x" opt; do
             ChModX="true"
             ;;
         :) # If Option require an argument and none given, Exit with Error
-            eprint "\e[41;1;37m [ERROR] Option '-$OPTARG' require a value \e[0m"; usage 40;
+            eprint "\\e[41;1;37m [ERROR] Option '-$OPTARG' require a value \\e[0m"; usage 40;
             ;;
         ? | *) # If not valid Option : print Warning
-            eprint "\e[43;1;90m [WARNING] Option '-$OPTARG' not Valid ! \e[0m"; usage 40;
+            eprint "\\e[43;1;90m [WARNING] Option '-$OPTARG' not Valid ! \\e[0m"; usage 40;
             ;;
     esac
 done
@@ -81,13 +81,13 @@ for target in $Targets; do
     ext="${filename#"$cmdname"}"
 
     if result=$(curl -sSfLk -o "${DestDir}/${Prefix}${cmdname}" "${EasyDockerUrl}/${target}" 2>&1); then
-        eprint "\e[0;32m [SUCCESS] ${target} imported in ${DestDir}/${Prefix}${cmdname} \e[0m"
+        eprint "\\e[0;32m [SUCCESS] ${target} imported in ${DestDir}/${Prefix}${cmdname} \\e[0m"
         if [ "$ext" = '.sh' ] || [ "$ChModX" = "true" ]; then
             chmod +x "${DestDir}/${Prefix}${cmdname}"
         fi
     else
-        eprint "\e[41;1;37m Failed to get ${EasyDockerUrl}/${target} \e[0m";
-        eprint "\e[41;1;37m [ERROR] ${result} \e[0m";
+        eprint "\\e[41;1;37m Failed to get ${EasyDockerUrl}/${target} \\e[0m";
+        eprint "\\e[41;1;37m [ERROR] ${result} \\e[0m";
     fi
 done
 
