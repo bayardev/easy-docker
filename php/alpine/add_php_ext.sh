@@ -48,14 +48,17 @@ the_end()
     exit $((ExitStatus))
 }
 
+# Write installed module in a temp file for easier search
 create_tmp_php_mods_list()
 {
-    if result=$(php -m 2>&1 > "$TMP_PHP_MODS_LIST_FILE"); then
-        eprint "[DEBUG] Created: $TMP_PHP_MODS_LIST_FILE"
-    else
-        status=$?
-        eprint "[ERROR] CODE: $status\\n MESSAGE: $result"
-        the_end $((status));
+    if ! [ -f "$TMP_PHP_MODS_LIST_FILE" ]; then
+        if result=$(php -m 2>&1 > "$TMP_PHP_MODS_LIST_FILE"); then
+            eprint "[DEBUG] Created: $TMP_PHP_MODS_LIST_FILE"
+        else
+            status=$?
+            eprint "[ERROR] CODE: $status\\n MESSAGE: $result"
+            the_end $((status));
+        fi
     fi
 
     return 0
@@ -111,15 +114,13 @@ eprint "[START]: $0"
 # Get PHP Version
 PHPVersion=$(php_version "short")
 
-# Write installed module in a temp file for easier search
-create_tmp_php_mods_list
-
 # Get extension list parameter
 AddPhpExt="$*"
 
 # Do the job :)
 # shellcheck disable=SC2086
 for ext in $AddPhpExt; do
+    create_tmp_php_mods_list
     if ! is_installed "$ext"; then
         eprint "[INFO] Gonna try to install ${ext}."
         case "$ext" in
