@@ -65,3 +65,7 @@ easy-add -h
        easy-add -p false php/update_phpini.sh
 
 ```
+
+## Help
+
+[EASY-DOCKER Scripts HELP](HELP.md)

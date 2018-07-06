@@ -19,8 +19,8 @@ easy_add_fpm_pool -h
 [Defaults]
     user  : www-data
     group : If the group is not set, the default user's group will be used
-
 ```
+
 
 ## php/update_fpm_pool
 
