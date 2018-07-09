@@ -182,8 +182,12 @@ for ext in $AddPhpExt; do
                 ;;
             mcrypt )
                 # echo "mcrypt"
-                apk add --no-cache libmcrypt libmcrypt-dev \
-                && docker-php-ext-install mcrypt
+                if [ "$PHPVersion" = "7.2" ]; then
+                    eprint "[WARNING] Cannot install 'mcrypt' in PHP 7.2; Since PHP 7.2 the mcrypt extension doesn't exists anymore"
+                else
+                    apk add --no-cache libmcrypt libmcrypt-dev \
+                    && docker-php-ext-install mcrypt
+                fi
                 ;;
             intl )
                 # echo "intl"
