@@ -171,8 +171,14 @@ for ext in $AddPhpExt; do
                 ;;
             zip )
                 # echo "zip"
-                apk add --no-cache zlib-dev \
-                && docker-php-ext-install zip
+                if [ "$PHPVersion" = "7.2" ]; then
+                    apk add --no-cache libzip-dev
+                    docker-php-ext-configure zip --with-libzip
+                    docker-php-ext-install zip
+                else
+                    apk add --no-cache zlib-dev \
+                    && docker-php-ext-install zip
+                fi
                 ;;
             mcrypt )
                 # echo "mcrypt"
