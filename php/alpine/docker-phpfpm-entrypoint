@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+# Create/Set User/Group if $FPM_USER and/or $FPM_GROUP are set
+if [ -n "$FPM_USER" ] && [ -n "$FPM_GROUP" ]; then
+    getent group "$FPM_GROUP" || addgroup "$FPM_GROUP"
+    getent passwd "$FPM_USER" || adduser -D -s /bin/sh -G "$FPM_GROUP" "$FPM_USER"
+elif [ -n "$FPM_USER" ]; then
+    getent passwd "$FPM_USER" || adduser -D -s /bin/sh "$FPM_USER"
+elif [ -n "$FPM_GROUP" ]; then
+    getent group "$FPM_GROUP" || addgroup "$FPM_GROUP"
+fi
+
+# Update php-fpm.d/www.conf Config if $FPM_* vars are setted
+easy_update_fpm_pool -d '/usr/local/etc/php-fpm.d'
+
+# If using unix socket, we nedd to update zz-docker.conf also
+if [ -n "$FPM_LISTEN" ]; then
+    Socket=$(printf '%s' "$FPM_LISTEN" | grep '.sock')
+    if [ -n "$Socket" ]; then
+        sed -i "s#^\\;\\?\\s*\\?listen =.*\\?#listen = ${FPM_LISTEN}#" /usr/local/etc/php-fpm.d/zz-docker.conf
+    fi
+fi
+
+# Update PHP Config if $PHP_* vars are setted
+easy_update_phpini -c -p /usr/local/etc/php/php.ini
+
+# Run tests on container if exists
+easy_ci_test_container || exit $?
+
+printf '\e[0;32m Starting php-fpm... \e[0m \n'
+php-fpm -F
