@@ -296,6 +296,14 @@ for ext in $AddPhpExt; do
                 && docker-php-ext-enable ssh2 \
                 && apk del .ssh2-deps
                 ;;
+            opcache )
+                docker-php-ext-install opcache
+                ;;
+            xdebug )
+                apk add --no-cache $PHPIZE_DEPS \
+                && pecl install xdebug \
+                && docker-php-ext-enable xdebug
+                ;;
             ? | *) # If extension not in cases
                 eprint "[WARNING] extension $ext is not present in case list";
                 eprint "[IMPORTANT] Please check extension name for: $ext"
