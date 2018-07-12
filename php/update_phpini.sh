@@ -99,7 +99,7 @@ usage()
     eprint "    -p </path/to/php.ini>   set php.ini path \\e[0;33m(default: /etc/php.ini)\\e[0m"
     eprint "    -c  force php.ini creation if doesn't exists"
     eprint "\\e[1;32m[Examples]\\e[0m"
-    eprint "       $0"
+    eprint "       PHP_DATE_TIMEZONE='Europe/Paris' $0"
     eprint "       $0 -p /etc/php.ini"
     eprint "       $0 -c -p '/usr/local/etc/php/php.ini'"
 
