@@ -110,7 +110,7 @@ phpini_list=$(printenv | awk -F '=' '/^PHPINI_/ {
         gsub("__", ".", ininame);
         printf "%s=%s\n", ininame, $2;
     }')
-[ -z "$phpini_list" ] && eprint "\\e[31;1m [ERROR] PHPINI list in environment variables is empty\\e[0m" && exit 0;
+[ -z "$phpini_list" ] && eprint "\\e[31;1m [WARNING] PHPINI list in environment variables is empty\\n\\e[32;1m [END] Executed: $0 :) \\e[0m" && exit 0;
 
 export phpini_list
 
