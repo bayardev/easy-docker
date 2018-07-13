@@ -1,48 +1,6 @@
 #!/bin/sh
 set -e
 
-# PHP.INI LIST
-readonly phpini_list="short_open_tag
-output_buffering
-open_basedir
-max_execution_time
-max_input_time
-max_input_vars
-memory_limit
-error_reporting
-display_errors
-display_startup_errors
-log_errors
-log_errors_max_len
-ignore_repeated_errors
-report_memleaks
-html_errors
-error_log
-post_max_size
-default_mimetype
-default_charset
-file_uploads
-upload_tmp_dir
-upload_max_filesize
-max_file_uploads
-allow_url_fopen
-allow_url_include
-default_socket_timeout
-date.timezone
-pdo_mysql.cache_size
-pdo_mysql.default_socket
-session.save_handler
-session.save_path
-session.use_strict_mode
-session.use_cookies
-session.cookie_secure
-session.name
-session.cookie_lifetime
-session.cookie_path
-session.cookie_domain
-session.cookie_httponly
-"
-
 eprint()
 {
     msg="${*}"
@@ -51,13 +9,14 @@ eprint()
 
 list_keys()
 {
-    eprint "--------- -------------"
-    eprint "|\\e[1;33mINI-KEY\\e[0m| |\\e[1;36mENVVAR-NAME\\e[0m|"
-    eprint "--------- -------------"
-    for phpini_key in $phpini_list; do
-        varname="PHP_"$(echo "$phpini_key" |tr "[:lower:]" "[:upper:]" |tr "." "_")
-        eprint "\\e[0;33m${phpini_key} \\e[0;36m${varname}\\e[0m"
-    done
+    printf "--------- %*s-------------\\n" "25"
+    printf "|\\e[1;33mINI-KEY\\e[0m| %*s|\\e[1;36mENVVAR-NAME\\e[0m|\\n" "25"
+    printf "--------- %*s-------------\\n" "25"
+    printenv |awk -F '=' '/^PHPINI_/ {
+        ininame = substr(tolower($1), 8);
+        gsub("__", ".", ininame);
+        printf "\033[0;33m%s \033[0;36m%42s\033[0m\n", ininame, $1;
+    }'
 }
 
 the_end()
@@ -72,9 +31,10 @@ the_end()
 
 update_line_if()
 {
-    if [ ! -z "$1" ]; then
-        value=$(printf '%s' "$1" | sed 's/[#\]/\\\0/g')
-        name="$2"
+    if [ ! -z "$2" ]; then
+        ## Met \devant les caractère spéciaux
+        value=$(printf '%s' "$2" | sed 's/[#\]/\\\0/g')
+        name="$1"
         success_msg="\\e[0;32m Set PHP ${name} = ${value} \\e[0m"
 
         if grep "${name} = " "${PhpIniPath}" > /dev/null; then
@@ -83,6 +43,12 @@ update_line_if()
         else
             echo "${name} = ${value}" >> "${PhpIniPath}" \
                 && eprint "$success_msg";
+        fi
+    else
+        if grep "${name} = " "${PhpIniPath}" > /dev/null; then
+            # shellcheck disable=SC2154
+            sed -i "s#\\;\\?\\s\\?${name} = ${value}#; ${name} = ${value}#" "${PhpIniPath}" \
+            && eprint "${name} is comment";
         fi
     fi
 }
@@ -96,10 +62,10 @@ usage()
     eprint "\\e[1;32m[Options]\\e[0m"
     eprint "    -h  print this help and exit"
     eprint "    -l  list ini_keys and exit"
-    eprint "    -p </path/to/php.ini>   set php.ini path \\e[0;33m(default: /etc/php.ini)\\e[0m"
-    eprint "    -c  force php.ini creation if doesn't exists"
+    eprint "    -p   </path/to/php.ini>   set php.ini path \\e[0;33m(default: /etc/php.ini)\\e[0m"
+    eprint "    -c  force php.ini creation if does not exists"
     eprint "\\e[1;32m[Examples]\\e[0m"
-    eprint "       PHP_DATE_TIMEZONE='Europe/Paris' $0"
+    eprint "       PHPINI_DATE_TIMEZONE='Europe/Paris' $0"
     eprint "       $0 -p /etc/php.ini"
     eprint "       $0 -c -p '/usr/local/etc/php/php.ini'"
 
@@ -116,7 +82,7 @@ while getopts ":hlp:c" opt; do
             usage 0;
             ;;
         l) # Print php.ini keys list
-            list_keys |column -t && exit 0;
+            list_keys; exit 0;
             ;;
         p) # Set PhpIniPath
             PhpIniPath="$OPTARG"
@@ -134,12 +100,24 @@ while getopts ":hlp:c" opt; do
 done
 shift "$((OPTIND-1))"
 
+
 # Print START script execution
-eprint "\\e[32;1m [START]: $0 \\e[0m\\n"
+eprint "\\e[32;1m [START]: $0 \\e[0m"
+
+# shellcheck disable=SC1004
+phpini_list=$(printenv | awk -F '=' '/^PHPINI_/ {
+        ininame = substr(tolower($1), 8);
+        gsub("__", ".", ininame);
+        printf "%s=%s\n", ininame, $2;
+    }')
+[ -z "$phpini_list" ] && eprint "\\e[31;1m [ERROR] PHPINI list in environment variables is empty\\e[0m" && exit 0;
+
+export phpini_list
 
 ## Default Value for "$PhpIniPath"
 PhpIniPath=${PhpIniPath:-"/etc/php.ini"}
 export PhpIniPath
+
 ## Create empty php.ini if doesn't exists and $Create=true
 if [ ! -f "$PhpIniPath" ]; then
     [ "$Create" != "true" ] && the_end "\\e[41;1;37m [ERROR] File not found: ${PhpIniPath} \\e[0m" 40;
@@ -151,11 +129,9 @@ if [ ! -f "$PhpIniPath" ]; then
     eprint "\\e[0;32m Succesfully created new file: ${PhpIniPath} \\e[0m"
 fi
 
-for phpini_key in $phpini_list; do
-    varname="PHP_"$(echo "$phpini_key" |tr "[:lower:]" "[:upper:]" |tr "." "_")
-    eval envvar="\${$varname}"
+for phpini_item in $phpini_list; do
     # shellcheck disable=SC2154
-    update_line_if "$envvar" "$phpini_key"
+    update_line_if $(echo $phpini_item |tr "=" " ")
 done
 
 # Exit Success

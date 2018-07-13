@@ -49,17 +49,31 @@ easy_update_phpini -h
 [Synopsis]
     Modify php.ini values according to EnvVars values
 [Usage]
-    easy_update_phpini [-c] [-p 'phpini-path']
+    ./update_phpini.sh [-c] [-p 'phpini-path']
 [Options]
     -h  print this help and exit
     -l  list ini_keys and exit
-    -p </path/to/php.ini>   set php.ini path (default: /etc/php.ini)
-    -c  force php.ini creation if doesn\'t exists
+    -p   </path/to/php.ini>   set php.ini path (default: /etc/php.ini)
+    -c  force php.ini creation if does not exists
 [Examples]
-       easy_update_phpini
-       easy_update_phpini -p /etc/php.ini
-       easy_update_phpini -c -p '/usr/local/etc/php/php.ini'
+       PHPINI_DATE_TIMEZONE='Europe/Paris' ./update_phpini.sh
+       ./update_phpini.sh -p /etc/php.ini
+       ./update_phpini.sh -c -p '/usr/local/etc/php/php.ini'
 
+```
+
+#### More information
+
+When exporting environment variable with "PHPINI_" header, if you give it a null value, this variable will be commented in php.ini if it exists keeping its value
+
+```sh
+PHPINI_DATE_TIMEZONE= ./update_phpini.sh
+./update_phpini.sh -p /etc/php.ini
+cat /etc/php.ini
+
+...
+; date_timezone='Europe/Paris'
+...
 ```
 
 ## php/alpine/add_php_ext
