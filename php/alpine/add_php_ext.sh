@@ -261,7 +261,9 @@ for ext in $AddPhpExt; do
             redis )
                 # echo "redis"
                 if [ "$PHPVersion" = "5.6" ]; then
-                    export PHPREDIS_VERSION="3.1.6"
+                    if [ -z "$PHPREDIS_VERSION" ]; then
+                        export PHPREDIS_VERSION="3.1.6"
+                    fi; \
                     docker-php-source extract \
                     && curl -L -o /tmp/redis.tar.gz "https://github.com/phpredis/phpredis/archive/${PHPREDIS_VERSION}.tar.gz" \
                     && tar xfz /tmp/redis.tar.gz \
@@ -272,7 +274,11 @@ for ext in $AddPhpExt; do
                 else
                     docker-php-source extract \
                     && apk add --no-cache --virtual .phpize-deps-configure $PHPIZE_DEPS \
-                    && yes 'no' | pecl install -fo redis \
+                    && if [ -n "$PHPREDIS_VERSION" ]; then
+                        yes 'no' | pecl install -fo redis-${PHPREDIS_VERSION}
+                    else
+                        yes 'no' | pecl install -fo redis 
+                    fi \
                     && docker-php-ext-enable redis \
                     && apk del .phpize-deps-configure \
                     && docker-php-source delete
