@@ -55,7 +55,7 @@ easy-add -h
 [Options]
     -h  print this help and exit
     -x  force 'chmod +x' on imported files
-    -d </path/to/destination>  set Destination Folder (default: '/usr/local/bin')
+    -d </path/to/destination>  set Destination Folder (default: '/usr/bin' || [debian/alpine] '/usr/local/bin')
     -p  <prefix_> set Prefix for imported filenames (default: 'easy_')
         To remove prefix use '-p false'
 [Examples]
